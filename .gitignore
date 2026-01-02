@@ -1,0 +1,11 @@
+/mr-nav-env
+*__pycache__
+*egg-info
+/log
+/dataset
+/record
+/.bak
+/.vscode
+/.git
+/bak
+/trajectories
