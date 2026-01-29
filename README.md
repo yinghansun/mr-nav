@@ -2,7 +2,7 @@
 Yinghan Sun, Aoji Zhu, Xiang Ji, Yamei Li, Jiachi Zhao, Yun Wang, Li Zhang, Huijun Gao, Lidong Yang.
 
 [fig1]
-![fig1](./assets/framework.pdf)
+![fig1](https://github.com/yinghansun/mr-nav/blob/main/assets/framework.pdf)
 
 ## Update
 - 2026-01-29: Clean the code and add additional instructions in the README.
