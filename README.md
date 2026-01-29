@@ -1,8 +1,10 @@
 # Ultra-fast Learning for Microrobot Navigation
 Yinghan Sun, Aoji Zhu, Xiang Ji, Yamei Li, Jiachi Zhao, Yun Wang, Li Zhang, Huijun Gao, Lidong Yang.
 
-[fig1]
-![fig1](https://github.com/yinghansun/mr-nav/blob/main/assets/framework.pdf)
+
+![fig:framework](https://github.com/yinghansun/mr-nav/blob/main/assets/framework.png?raw=true)
+In the proposed framework, we develop a fully vectorized simulator with more than 10,000 artificial vascular environments, parallelizing dynamics, LiDAR-inspired perception, and feasibility checks across over 8,000 environments to achieve roughly 100,000 transitions per second. 
+To achieve effectiveness in the fast training, we propose a task–shaping–regularization (TSR) reward design. TSR can accelerate convergence, improve final performance, and enhance trajectory smoothness and obstacle safety.
 
 ## Update
 - 2026-01-29: Clean the code and add additional instructions in the README.
