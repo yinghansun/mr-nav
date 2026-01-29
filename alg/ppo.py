@@ -28,6 +28,7 @@
 #
 # Copyright (c) 2021 ETH Zurich, Nikita Rudin
 
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -89,14 +90,12 @@ class PPO:
         num_envs,
         num_transitions_per_env,
         actor_obs_shape,
-        critic_obs_shape,
         action_shape,
     ):
         self.storage = RolloutStorage(
             num_envs,
             num_transitions_per_env,
             actor_obs_shape,
-            critic_obs_shape,
             action_shape,
             self.device,
         )
@@ -112,17 +111,14 @@ class PPO:
         self.transition.actions = self.actor_critic.act(obs).detach()
 
         # evaluate
-        # critic_obs = torch.cat((obs, targets), dim=-1)
-        critic_obs = obs
-        self.transition.values = self.actor_critic.evaluate(critic_obs).detach()
+        self.transition.values = self.actor_critic.evaluate(obs).detach()
 
         # storage
         self.transition.actions_log_prob = self.actor_critic.get_actions_log_prob(self.transition.actions).detach()
         self.transition.action_mean = self.actor_critic.action_mean.detach()
         self.transition.action_sigma = self.actor_critic.action_std.detach()
-        # need to record obs and critic_obs before env.step()
+        # need to record obs before env.step()
         self.transition.observations = obs
-        self.transition.critic_observations = critic_obs
         return self.transition.actions
 
     def process_env_step(self, rewards: torch.Tensor, dones: torch.Tensor, infos: dict):
@@ -139,8 +135,8 @@ class PPO:
         self.transition.clear()
         self.actor_critic.reset(dones)
 
-    def compute_returns(self, last_critic_obs: torch.Tensor):
-        last_values = self.actor_critic.evaluate(last_critic_obs).detach()
+    def compute_returns(self, last_obs: torch.Tensor):
+        last_values = self.actor_critic.evaluate(last_obs).detach()
         self.storage.compute_returns(last_values, self.gamma, self.lam)
 
     def update(self):
@@ -154,7 +150,6 @@ class PPO:
         )
         for (
             obs_batch,
-            critic_obs_batch,
             actions_batch,
             target_values_batch,
             advantages_batch,
@@ -165,7 +160,7 @@ class PPO:
         ) in generator:
             self.actor_critic.act(obs_batch)
             actions_log_prob_batch = self.actor_critic.get_actions_log_prob(actions_batch)
-            value_batch = self.actor_critic.evaluate(critic_obs_batch)
+            value_batch = self.actor_critic.evaluate(obs_batch)
             mu_batch = self.actor_critic.action_mean
             sigma_batch = self.actor_critic.action_std
             entropy_batch = self.actor_critic.entropy

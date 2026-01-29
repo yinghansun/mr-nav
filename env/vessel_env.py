@@ -10,11 +10,11 @@ import torch
 import torchvision.transforms as transforms
 
 from cfg.vessel_env_cfg import VesselEnvCfg
-from utils.vis_utils import draw_star
 try:
     from .freespace_env import FreeSpace
 except ImportError:
     from env.freespace_env import FreeSpace
+from utils.vis_utils import draw_star
 
 
 class VesselEnv(FreeSpace):
@@ -109,7 +109,8 @@ class VesselEnv(FreeSpace):
             # self.vel,
         ), dim=-1)
 
-    def step(self, actions: torch.Tensor):
+    def step(self, actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict]:
+
         self.step_counter += 1
 
         self._process_actions(actions)
@@ -164,17 +165,10 @@ class VesselEnv(FreeSpace):
         idx: int = 0,
         options: dict = {}
     ) -> np.ndarray:
-        """
-        Render the current state of the environment.
-
-        Args:
-            mode (str): Rendering mode, options are 'selected' (default) or 'all'.
-            idx (int): Environment index to render, default is 0.
-        """
         self.render_id = idx
         self.repeat_plot = False if 'repeat_plot' not in options else options['repeat_plot']
         traj_color = (180, 200, 0) if 'traj_color' not in options else options['traj_color']
-        non_vascular_area_color = [100, 100, 100] if 'non_vascular_area_color' not in options else options['non_vascular_area_color']
+        non_vascular_area_color = [0, 255, 0] if 'non_vascular_area_color' not in options else options['non_vascular_area_color']
 
         if mode == 'selected':
             if not hasattr(self, 'img_rgb_numpy'):
@@ -234,10 +228,7 @@ class VesselEnv(FreeSpace):
             raise NotImplementedError
 
         cv2.imshow('Blood Vessel Environment', img_rgb_numpy_)
-        key = cv2.waitKey(1)
-        if key == ord('i') or (robot_pos[0] == 80) or (robot_pos[0] == 396):
-            print('*'*20)
-            cv2.imwrite('./save_.png', img_rgb_numpy_)
+        cv2.waitKey(1)
 
         return self.img_rgb_numpy
 

@@ -18,22 +18,14 @@ class MLP(nn.Module):
     ) -> None:
         '''A class for Multi-Layer Perceptron (MLP).
 
-        Params
-        ------
-        input_size: int
-            size of input data.
-        output_size: int
-            size of output features.
-        hidden_size: List[int]
-            a list containing the size of each hidden layer.
-        activate_func: Optional[str], default = 'relu'
-            the name of the activation function.
-        normalize_output: Optional[bool] = False
-            normalize the output of the MLP if True.
-        print_info: Optional[bool], default = False
-            print the information of each layer if True.
-        name: Optional[str], default = 'MLP'
-            give the current MLP object a name
+        Args:
+            input_size (int): size of input data.
+            output_size (int): size of output features.
+            hidden_size (List[int]): a list containing the size of each hidden layer.
+            activate_func (Optional[str], default = 'relu'): the name of the activation function.
+            normalize_output (Optional[bool], default = False): normalize the output of the MLP if True.
+            print_info (Optional[bool], default = False): print the information of each layer if True.
+            name (Optional[str], default = 'MLP'): give the current MLP object a name.
         '''
         super(MLP, self).__init__()
 

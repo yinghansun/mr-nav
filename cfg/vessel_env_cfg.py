@@ -1,9 +1,12 @@
+from typing import List
+
+from .alg_cfg import ActorCriticCfg
 from .env_cfg import EnvCfg
 
 
 class VesselEnvCfg(EnvCfg):
 
-    num_envs: int = 40
+    num_envs: int = 8192
     img_idx: int = 0  # only valid for num_envs = 1
     
     max_episode_length: int = 1500
@@ -17,27 +20,19 @@ class VesselEnvCfg(EnvCfg):
     num_vel: int = 2
 
     num_actions: int = 1
-    action_distribution_type: str = 'beta'  # ['normal', 'beta']
-    action_degree_type: str = 'degree'  # ['radian', 'degree']
+    action_distribution_type: str = 'normal'  # ['normal', 'beta']
+    action_degree_type: str = 'radian'  # ['radian', 'degree']
 
     num_lidar_directions: int = 36
     lidar_max_depth: int = 20
     
     # lidar + target + pos + last action
-    num_obs: int = num_lidar_directions * 2 + num_pos * 2 + num_actions 
+    num_obs: int = num_lidar_directions * 2 + num_pos * 2 + num_actions
 
     class sim:
         sim_vessel2d_dataset_path: str = './dataset/unique_simulated_vessel_2d'
         sim_width: int = 128
         sim_height: int = 128
-
-        # sim_vessel2d_dataset_path: str = './dataset/unique_simulated_vessel_2d_downsampled'
-        # sim_width: int = 32
-        # sim_height: int = 32
-
-        # sim_vessel2d_dataset_path: str = './dataset/selected_32x32'
-        # sim_width: int = 32
-        # sim_height: int = 32
 
         robot_dim: int = 1
 
@@ -48,19 +43,15 @@ class VesselEnvCfg(EnvCfg):
             collision: float = -10
             
             # shape
-            # distance_change: float = 0.5     # optimal value: 0.5
-            distance: float = -1e-3            # optimal value: 1e-5 when it is the main objective
+            distance_change: float = 0.5     # optimal value: 0.5
 
             # regularization
-            # action_rate: float = -1e-2
-            # log_obstacle: float = 0.001
-            # pbrs_log_obstacle: float = -0.1
-            # inverse_obstacle: float = 0.01
+            action_rate: float = -1e-2
+            log_obstacle: float = 0.001
 
     class render:
         scale: int = 5
-        robot_dim_vis: int = 16   # d
-        # robot_color: tuple = (0, 150, 255)
+        robot_dim_vis: int = 4   # d
         robot_color: tuple = (255, 150, 0)   # (B, G, R)
 
         target_dim_vis: int = 6  # d
@@ -68,3 +59,10 @@ class VesselEnvCfg(EnvCfg):
         target_thickness: int = 10
 
         intersection_pts_dim_vis: int = 1
+
+
+class VesselEnvActorCriticCfg(ActorCriticCfg):
+
+    actor_hidden_dims: List[int] = [256, 128, 16]
+    critic_hidden_dims: List[int] = [256, 128, 16]
+    distribution_type: str = 'normal'  # ['normal', 'beta']

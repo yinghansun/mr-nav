@@ -9,7 +9,7 @@ class EnvCfg:
     # dynamics
     mu: float = 2. / 9
     frequency: float = 9
-    noise_level: float = 0.1
+    noise_level: float = 0.2
 
     max_episode_length: int = 3000
 
@@ -19,7 +19,7 @@ class EnvCfg:
 
     num_actions: int = 1
     action_distribution_type: str = 'beta'  # ['normal', 'beta']
-    action_degree_type: str = 'radian'  # ['radian', 'degree']
+    action_degree_type: str = 'radian'      # ['radian', 'degree']
 
     use_img: bool = False
     num_img_latent: int = 64
@@ -33,12 +33,7 @@ class EnvCfg:
     class sim:
         sim_width: int = 128
         sim_height: int = 128
-        # sim_width: int = 32
-        # sim_height: int = 32
-        # sim_width: int = 512
-        # sim_height: int = 512
-        # sim_width: int = 1024
-        # sim_height: int = 1024
+
         robot_dim: int = 3
 
     class render:
@@ -48,15 +43,12 @@ class EnvCfg:
 
     class reward:
         class scales:
-            position_tracking: float = 0.
-            action_rate: float = -1e-2
+            # task
             reach_target: float = 10
             collision: float = -10
+            
+            # shape
             distance_change: float = 0.5
-            # time_accumulation: float = -1e-5
-            # time_accumulation: float = -1e-2   # optimal value when it is the main objective
-            # distance: float = -1e-4            # optimal value when it is the main objective
-            # one_over_distance: float = 1e-1
-            # pbrs_one_over_distance: float = 0.
 
-        position_tracking_sigma: float = 2500
+            # regularization
+            action_rate: float = -1e-2

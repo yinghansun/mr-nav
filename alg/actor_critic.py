@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from torch.distributions import Normal, Beta
+from torch.distributions import Beta, Normal
 
 from utils.mlp import MLP
 
@@ -82,8 +82,6 @@ class ActorCritic(nn.Module):
         return self.distribution.entropy().sum(dim=-1)
 
     def update_distribution(self, observations: torch.Tensor):
-        '''observations: (num_envs, num_actor_input)
-        '''
         if self.distribution_type == "normal":
             mean = self.actor(observations)  # (num_envs, num_actions)
             self.distribution = Normal(mean, mean * 0.0 + torch.exp(self.logstd))

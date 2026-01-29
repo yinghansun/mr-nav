@@ -3,10 +3,10 @@ from typing import List
 
 class ActorCriticCfg:
 
-    actor_hidden_dims: List[int] = [128, 64, 32]
-    critic_hidden_dims: List[int] = [128, 64, 32]
+    actor_hidden_dims: List[int] = [256, 128, 16]
+    critic_hidden_dims: List[int] = [256, 128, 16]
     activation: str = 'elu'
-    distribution_type: str = 'beta'  # ['normal', 'beta']
+    distribution_type: str = 'normal'  # ['normal', 'beta']
 
 
 class PPOCfg:
@@ -31,7 +31,6 @@ class PPOCfg:
 
 class RunnerCfg:
 
-    # num_steps_per_env: int = 24
     batch_size: int = 196608      # 8192 * 24
 
     empirical_normalization: bool = True
@@ -39,4 +38,3 @@ class RunnerCfg:
     # log
     save_interval: int = 50
     log_dir: str = './log'
-    # experiment_name: str = '2D_constant_vel'

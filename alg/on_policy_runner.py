@@ -72,29 +72,24 @@ class OnPolicyRunner:
             device=self.device,
         )
 
-        # self.num_steps_per_env = runner_cfg.num_steps_per_env
         self.num_steps_per_env = runner_cfg.batch_size // self.env.num_envs
         self.save_interval = runner_cfg.save_interval
 
         if self.runner_cfg.empirical_normalization:
             self.obs_normalizer = EmpiricalNormalization(shape=[env.num_obs], until=1.0e8).to(self.device)
-            self.critic_obs_normalizer = EmpiricalNormalization(shape=[env.num_obs], until=1.0e8).to(self.device)
         else:
             # identity mapping indicates no normalization
             self.obs_normalizer = torch.nn.Identity().to(self.device)
-            self.critic_obs_normalizer = torch.nn.Identity().to(self.device)
 
         self.alg.init_storage(
             self.env.num_envs,
             self.num_steps_per_env,
             actor_obs_shape=[self.env.num_actor_input],
-            critic_obs_shape=[self.env.num_critic_input],
             action_shape=[self.env.num_actions],
         )
 
         # log
         self.log_dir = runner_cfg.log_dir
-        # self.log_dir = os.path.join(runner_cfg.log_dir, runner_cfg.experiment_name)
         self.log_dir = os.path.join(runner_cfg.log_dir, type(env).__name__)
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
@@ -120,7 +115,6 @@ class OnPolicyRunner:
         self.current_learning_iteration = 0
 
     def learn(self, num_learning_iterations: int):
-        # initialize writer
         if self.log_dir is not None and self.writer is None:
             self.writer = SummaryWriter(log_dir=self.log_dir, flush_secs=10)
 
@@ -143,11 +137,8 @@ class OnPolicyRunner:
                 for _ in range(self.num_steps_per_env):   
                     actions = self.alg.act(obs)   # (num_envs, num_actions)
                     obs, rewards, dones, infos = self.env.step(actions.to(self.env.device))
-                    critic_obs = obs # TODO
-                    # move to the right device
-                    obs, critic_obs, rewards, dones = (
+                    obs, rewards, dones = (
                         obs.to(self.device),
-                        critic_obs.to(self.device),
                         rewards.to(self.device),
                         dones.to(self.device),
                     )
@@ -156,20 +147,11 @@ class OnPolicyRunner:
 
                     # Normalize observations
                     obs = self.obs_normalizer(obs)
-                    # Extract critic observations and normalize
-                    # if "critic" in infos["observations"]:
-                    #     critic_obs = self.critic_obs_normalizer(infos["observations"]["critic"].to(self.device))
-                    # else:
-                    #     critic_obs = obs
-                    critic_obs = obs  # no compute_critic_obs() in env.py temporally
 
                     # process the step
                     self.alg.process_env_step(rewards, dones, infos)
 
                     if self.log_dir is not None:
-                        # Book keeping
-                        # note: we changed logging to use "log" instead of "episode" to avoid confusion with
-                        # different types of logging data (rewards, curriculum, etc.)
                         if "episode" in infos:
                             ep_infos.append(infos["episode"])
                         elif "log" in infos:
@@ -177,6 +159,7 @@ class OnPolicyRunner:
                         
                         if "avg_success_rate_100" in infos:
                             avg_success_rate_100 = infos["avg_success_rate_100"]
+
                         if "total_num_trajs" in infos:
                             total_num_trajs = infos["total_num_trajs"]
 
@@ -193,7 +176,7 @@ class OnPolicyRunner:
 
                 # Learning step
                 start = stop
-                self.alg.compute_returns(critic_obs)
+                self.alg.compute_returns(obs)
 
             mean_value_loss, mean_surrogate_loss, mean_kl = self.alg.update()
             stop = time.time()
@@ -238,7 +221,6 @@ class OnPolicyRunner:
                 else:
                     self.writer.add_scalar("Episode/" + key, value, locs["it"])
                     ep_string += f"""{f'Mean episode {key}:':>{pad}} {value:.4f}\n"""
-        # mean_std = self.alg.actor_critic.std.mean()
 
         if locs["avg_success_rate_100"] is not None:
             self.writer.add_scalar("Evaluation/avg_success_rate_100", locs["avg_success_rate_100"], locs["it"])
@@ -253,7 +235,6 @@ class OnPolicyRunner:
         self.writer.add_scalar("Loss/value_function", locs["mean_value_loss"], locs["it"])
         self.writer.add_scalar("Loss/surrogate", locs["mean_surrogate_loss"], locs["it"])
         self.writer.add_scalar("Loss/learning_rate", self.alg.learning_rate, locs["it"])
-        # self.writer.add_scalar("Policy/mean_noise_std", mean_std.item(), locs["it"])
         self.writer.add_scalar("Perf/total_fps", fps, locs["it"])
         self.writer.add_scalar("Perf/collection time", locs["collection_time"], locs["it"])
         self.writer.add_scalar("Perf/learning_time", locs["learn_time"], locs["it"])
@@ -271,12 +252,9 @@ class OnPolicyRunner:
                             'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n"""
                 f"""{'Value function loss:':>{pad}} {locs['mean_value_loss']:.4f}\n"""
                 f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
-                # f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n"""
                 f"""{'Mean reward:':>{pad}} {statistics.mean(locs['rewbuffer']):.2f}\n"""
                 f"""{'Mean episode length:':>{pad}} {statistics.mean(locs['lenbuffer']):.2f}\n"""
             )
-            #   f"""{'Mean reward/step:':>{pad}} {locs['mean_reward']:.2f}\n"""
-            #   f"""{'Mean episode length/episode:':>{pad}} {locs['mean_trajectory_length']:.2f}\n""")
         else:
             log_string = (
                 f"""{'#' * width}\n"""
@@ -285,10 +263,7 @@ class OnPolicyRunner:
                             'collection_time']:.3f}s, learning {locs['learn_time']:.3f}s)\n"""
                 f"""{'Value function loss:':>{pad}} {locs['mean_value_loss']:.4f}\n"""
                 f"""{'Surrogate loss:':>{pad}} {locs['mean_surrogate_loss']:.4f}\n"""
-                # f"""{'Mean action noise std:':>{pad}} {mean_std.item():.2f}\n"""
             )
-            #   f"""{'Mean reward/step:':>{pad}} {locs['mean_reward']:.2f}\n"""
-            #   f"""{'Mean episode length/episode:':>{pad}} {locs['mean_trajectory_length']:.2f}\n""")
 
         log_string += ep_string
         log_string += (
@@ -310,7 +285,6 @@ class OnPolicyRunner:
         }
         if self.runner_cfg.empirical_normalization:
             saved_dict["obs_norm_state_dict"] = self.obs_normalizer.state_dict()
-            saved_dict["critic_obs_norm_state_dict"] = self.critic_obs_normalizer.state_dict()
         if self.env.img_model is not None:
             saved_dict["img_model_state_dict"] = self.env.img_model.state_dict()
         torch.save(saved_dict, path)
@@ -320,7 +294,6 @@ class OnPolicyRunner:
         self.alg.actor_critic.load_state_dict(loaded_dict["model_state_dict"])
         if self.runner_cfg.empirical_normalization:
             self.obs_normalizer.load_state_dict(loaded_dict["obs_norm_state_dict"])
-            self.critic_obs_normalizer.load_state_dict(loaded_dict["critic_obs_norm_state_dict"])
         if self.env.img_model is not None:
             self.env.img_model.load_state_dict(loaded_dict["img_model_state_dict"])
         if load_optimizer:

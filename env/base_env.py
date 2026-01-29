@@ -1,9 +1,12 @@
+from abc import ABC, abstractmethod
+
+import numpy as np
 import torch
 
 from cfg.env_cfg import EnvCfg
 
 
-class BaseEnv:
+class BaseEnv(ABC):
 
     def __init__(
         self,
@@ -61,16 +64,36 @@ class BaseEnv:
     def _create_sim(self):
         raise NotImplementedError
 
+    @abstractmethod
     def reset(self, reset_ids):
+        '''Reset the environments specified by reset_ids.
+        '''
         raise NotImplementedError
 
     def get_observations(self):
         return self.obs
     
+    @abstractmethod
     def compute_observation(self):
+        '''Compute the observations for all environments and fill in self.obs.
+        '''
         raise NotImplementedError
    
+    @abstractmethod
     def step(self, actions: torch.Tensor):
+        '''
+        Process a simulation step in the environment.
+
+        Args:
+            actions (torch.Tensor): The actions to take, with shape (num_envs, num_actions).
+
+        Returns:
+            tuple: A tuple containing:
+                - obs (torch.Tensor): The observations, with shape (num_envs, num_obs).
+                - rewards (torch.Tensor): The rewards, with shape (num_envs,).
+                - reset_buffer (torch.Tensor): The reset buffer, with shape (num_envs,).
+                - extras (dict): Additional information.
+        '''
         return (
             self.obs,
             self.rewards,
@@ -78,7 +101,24 @@ class BaseEnv:
             self.extras
         )
 
-    def render(self):
+    @abstractmethod
+    def render(
+        self,
+        mode: str = 'selected', 
+        idx: int = 0,
+        options: dict = {}
+    ) -> np.ndarray:
+        """
+        Render the current state of the environment.
+
+        Args:
+            mode (str): Rendering mode, options are 'selected' (default) or 'all'.
+            idx (int): Environment index to render, default is 0.
+            options (dict): Additional rendering options, default is empty.
+
+        Returns:
+            np.ndarray: The rendered image as a NumPy array.
+        """
         raise NotImplementedError
 
     def check_termination(self):

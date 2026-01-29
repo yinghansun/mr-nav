@@ -4,12 +4,12 @@ import cv2
 import numpy as np
 import torch
 
-from cfg.freespace_cfg import FreespaceCfg
-from utils.class2dict import class_to_dict
 try:
     from .base_env import BaseEnv
 except ImportError:
     from base_env import BaseEnv
+from cfg.freespace_cfg import FreespaceCfg
+from utils.class2dict import class_to_dict
 
 
 class FreeSpace(BaseEnv):
@@ -36,6 +36,8 @@ class FreeSpace(BaseEnv):
         self.extras["avg_success_rate_100"] = 0.
         self.extras["total_num_trajs"] = 0.
 
+        self.last_delta_pos = torch.zeros((self.num_envs, 2), dtype=torch.float32, device=self.device)
+
     def _create_sim(self):
         # Create a white image tensor
         self.img_tensor = 255 * torch.ones(
@@ -53,6 +55,8 @@ class FreeSpace(BaseEnv):
         self.last_actions[reset_ids] = 0.
         self.last_distance[reset_ids] = 0.
         # self.last_distance[reset_ids] = 9999999.
+
+        self.last_delta_pos[reset_ids] = self.targets[reset_ids] - self.pos[reset_ids]
 
         self.pos_history[reset_ids, ...] = 0.
 
@@ -74,6 +78,7 @@ class FreeSpace(BaseEnv):
             self.targets - self.pos,
             self.actions,
         ), dim=-1)
+        self.last_delta_pos = self.targets - self.pos
 
     def step(self, actions: torch.Tensor):
         self.step_counter += 1
@@ -127,15 +132,9 @@ class FreeSpace(BaseEnv):
     def render(
         self, 
         mode: str = 'selected', 
-        idx: int = 0
+        idx: int = 0,
+        options: dict = {}
     ) -> np.ndarray:
-        """
-        Render the current state of the environment.
-
-        Args:
-            mode (str): Rendering mode, options are 'selected' (default) or 'all'.
-            idx (int): Environment index to render, default is 0.
-        """
         img = self.img_tensor.cpu().numpy().transpose(1, 0, 2).copy()
 
         if mode == 'selected':
@@ -244,17 +243,12 @@ class FreeSpace(BaseEnv):
             cur_reward_term = self.reward_functions[i]() * self.reward_scales[name]
             self.rewards += cur_reward_term
             self.reward_episode_sums[name] += cur_reward_term
-        
-        # print('reward contains inf:', torch.isinf(self.rewards).any())
+
             if torch.isinf(cur_reward_term).any():
                 print(name)
 
     def _degree2radian(self, degree):
         return degree * np.pi / 180
-
-    def _reward_position_tracking(self):
-        error = torch.sum(torch.square(self.targets - self.pos), dim=1)
-        return torch.exp(-error / self.env_cfg.reward.position_tracking_sigma)
 
     def _reward_action_rate(self):
         return torch.sum(torch.square(self.last_actions - self.actions), dim=1)
@@ -275,20 +269,10 @@ class FreeSpace(BaseEnv):
         return torch.norm(self.pos - self.targets, dim=1)
 
     def _reward_time_accumulation(self):
-        # return self.step_counter
         return torch.ones(self.num_envs, dtype=torch.float, device=self.device)
     
     def _reward_one_over_distance(self):
         return 1. / (torch.norm(self.pos - self.targets, dim=1) + 1e-6)
-    
-    def _reward_pbrs_one_over_distance(self):
-        distance = torch.norm(self.pos - self.targets, dim=1)
-        diff = (1. / (distance + 1e-6)) - (1. / (self.last_distance + 1e-6))
-        # zero_last_dist_idx = (self.last_distance == 0).nonzero(as_tuple=True)[0]
-        # if len(zero_last_dist_idx) > 0:
-        #     diff[zero_last_dist_idx] = 0
-        self.last_distance = distance
-        return diff
 
 
 if __name__ == '__main__':
