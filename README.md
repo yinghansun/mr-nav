@@ -34,7 +34,7 @@ To achieve effectiveness in the fast training, we propose a task–shaping–reg
         $ pip install -e .
         ~~~
 4. Prepare the dataset. Users can either play with the dataset used in the paper or prepare their own dataset.
-     - Download the expert dataset from [here](https://mycuhk-my.sharepoint.com/personal/1155135830_link_cuhk_edu_hk/_layouts/15/onedrive.aspx?id=%2Fpersonal%2F1155135830%5Flink%5Fcuhk%5Fedu%5Fhk%2FDocuments%2Fdataset&ga=1) and put it in the `dataset` folder.
+     - Download the expert dataset from [here](https://figshare.com/articles/dataset/Autonomous_environment-adaptive_microrobot_swarm_navigation_enabled_by_deep_learning-based_real-time_distribution_planning_dataset_/19149779/1?file=34023026) and put it in the `dataset` folder.
      - Process the dataset.
         ~~~
         $ python scripts/process_dataset.py
