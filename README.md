@@ -7,8 +7,22 @@ In the proposed framework, we develop a fully vectorized simulator with more tha
 To achieve effectiveness in the fast training, we propose a task–shaping–regularization (TSR) reward design. TSR can accelerate convergence, improve final performance, and enhance trajectory smoothness and obstacle safety.
 
 ## Update
+- 2026-04-28：Add more instructions and in-line comments.
 - 2026-01-29: Clean the code and add additional instructions in the README.
 - 2026-01-12: Release the code of the paper "Ultra-fast Learning for Microrobot Navigation".
+
+## Repository Structure
+```
+.
+├── alg               # RL algorithms
+├── cfg               # Configuration files
+├── dataset           # Dataset for establish the simulation
+├── log               # Log files generated during training
+├── saved_model       # Saved models for evaluation and visualization
+├── scripts           # Training and evaluation scripts
+├── utils             # Utility functions for this project
+└── ...
+```
 
 ## Installation
 1. Clone this repository: `git clone https://github.com/yinghansun/mr-nav.git`

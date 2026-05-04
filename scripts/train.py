@@ -13,8 +13,15 @@ from utils.log_utils import save_configs, save_env_files
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """
+    Builds and returns an argument parser for the training script.
+
+    Returns:
+        argparse.ArgumentParser: The configured argument parser.
+    """
     parser = argparse.ArgumentParser(
         prog="train.py",
+        description="Train a reinforcement learning agent in a specified environment.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--env", type=str, default="freespace_env", help="Type of the simulation environment")
@@ -26,10 +33,17 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def train(args: argparse.Namespace):
+    """
+    Trains a PPO agent in the specified environment.
+
+    Args:
+        args (argparse.Namespace): The command-line arguments.
+    """
     assert args.env in ['freespace_env', 'vessel_env'], "Unsupported environment type"
     assert args.num_run > 0, "Number of runs must be positive"
     assert args.num_epoch > 0, "Number of epochs must be positive"
 
+    # Loop for the specified number of runs
     for _ in range(args.num_run):
         if args.env == 'freespace_env':
             env_cfg = FreespaceCfg()
@@ -61,6 +75,7 @@ def train(args: argparse.Namespace):
 
         runner.learn(args.num_epoch)
 
+        # Cleanup memory after each run to avoid memory leaks
         del runner, env, env_cfg, actor_critic_cfg, ppo_cfg, runner_cfg
         gc.collect()
         torch.cuda.empty_cache()

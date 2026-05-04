@@ -9,6 +9,12 @@ from env.vessel_env import VesselEnv
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """
+    Builds and returns an argument parser for the playing script.
+
+    Returns:
+        argparse.ArgumentParser: The configured argument parser.
+    """
     parser = argparse.ArgumentParser(
         prog="train.py",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -20,6 +26,12 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def play(args: argparse.Namespace):
+    """
+    Initializes and runs the simulation environment with a trained model.
+    
+    Args:
+        args (argparse.Namespace): The command-line arguments.
+    """
     assert args.env in ['freespace_env', 'vessel_env'], "Unsupported environment type"
     
     if args.env == 'freespace_env':
@@ -48,6 +60,7 @@ def play(args: argparse.Namespace):
     model_path = args.model_path
     runner.load(model_path)
 
+    # Main simulation loop
     obs = env.get_observations()
     for i in range(2999):
         obs = runner.obs_normalizer(obs)
