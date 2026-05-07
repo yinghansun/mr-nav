@@ -72,9 +72,14 @@ To achieve effectiveness in the fast training, we propose a task–shaping–reg
     - During training, we do not render the environment by default to speed up the training process. Users can set `--vis True` to visualize the environment during training if needed.
     - Users can set `--render_idx` to visualize the environment with the specified environment index during training. If not set, the environment with index 0 will be visualized.
 2. Play with the trained policy:
-    ~~~
-    $ python ./scripts/play.py --env vessel_env --model_path ./saved_model/VesselEnv/model_499.pt
-    ~~~
+    - Freespace environment:
+        ~~~
+        $ python ./scripts/play.py --env freespace_env --model_path ./saved_model/FreeSpace/model_499.pt
+        ~~~
+    - Vascular environment:
+        ~~~
+        $ python ./scripts/play.py --env vessel_env --model_path ./saved_model/VesselEnv/model_499.pt
+        ~~~
 
 ## Acknowledgements
 Our implementation of RL algorithms leverages the code from [RSL-RL](https://github.com/leggedrobotics/rsl_rl). We thank the authors for their open-source code.
