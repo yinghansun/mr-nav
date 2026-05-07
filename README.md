@@ -43,7 +43,7 @@ To achieve effectiveness in the fast training, we propose a task–shaping–reg
     ~~~
 3. Install dependencies.
     - Install `PyTorch` based on your platform. Please refer to [PyTorch](https://pytorch.org/get-started/locally/) for more details.
-    - Install other dependencies and mr-nav.
+    - Install other dependencies and mr-nav (This takes 1 - 5 mins to install).
         ~~~
         $ pip install -e .
         ~~~
