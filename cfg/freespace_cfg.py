@@ -4,7 +4,7 @@ from .env_cfg import EnvCfg
 
 class FreespaceCfg(EnvCfg):
 
-    num_envs: int = 8192
+    num_envs: int = 4096
 
     num_channels: int = 3
     

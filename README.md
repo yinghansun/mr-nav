@@ -24,6 +24,9 @@ To achieve effectiveness in the fast training, we propose a task–shaping–reg
 └── ...
 ```
 
+## Requirement
+To achieve a high parallelism and fast training, we recommand user to train the policy on a GPU with at least 8 GB memory. However, users who only want to play with the trained policy can run the code on a CPU.
+
 ## Installation
 1. Clone this repository: `git clone https://github.com/yinghansun/mr-nav.git`
 2. Create a virtual environment. Below is an example using `virtualenv`.
@@ -57,7 +60,7 @@ To achieve effectiveness in the fast training, we propose a task–shaping–reg
 ## Usage
 1. Train a policy:
     ~~~
-    $ python ./scripts/train.py --env vessel_env --num_run 1 --num_epoch 1000
+    $ python ./scripts/train.py --env vessel_env --num_run 1 --num_epoch 500
     ~~~
     Note:
     - The trained policy will be saved in `./log/<env_type>/<date>_<batch_size>_<num_envs>_<idx>/`, where 
@@ -71,6 +74,7 @@ To achieve effectiveness in the fast training, we propose a task–shaping–reg
         ~~~
     - During training, we do not render the environment by default to speed up the training process. Users can set `--vis True` to visualize the environment during training if needed.
     - Users can set `--render_idx` to visualize the environment with the specified environment index during training. If not set, the environment with index 0 will be visualized.
+    - The overall training process takes about 8 - 10 minutes on a computer with a NVIDIA RTX 3060 GPU.
 2. Play with the trained policy:
     - Freespace environment:
         ~~~

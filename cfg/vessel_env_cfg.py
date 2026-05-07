@@ -6,7 +6,7 @@ from .env_cfg import EnvCfg
 
 class VesselEnvCfg(EnvCfg):
 
-    num_envs: int = 8192
+    num_envs: int = 4096
     img_idx: int = 0  # only valid for num_envs = 1
     
     max_episode_length: int = 1500
