@@ -27,6 +27,17 @@ To achieve effectiveness in the fast training, we propose a task–shaping–reg
 ## Requirement
 To achieve a high parallelism and fast training, we recommand user to train the policy on a GPU with at least 8 GB memory. However, users who only want to play with the trained policy can run the code on a CPU.
 
+This repository has been tested on the following environments:
+~~~
+python==3.12.8
+numpy==2.4.2
+cv2==4.12.0
+matplotlib==3.10.8
+tensorboard==2.20.0
+pyyaml==6.0.3
+tqdm==4.67.3
+~~~
+
 ## Installation
 1. Clone this repository: `git clone https://github.com/yinghansun/mr-nav.git`
 2. Create a virtual environment. Below is an example using `virtualenv`.
